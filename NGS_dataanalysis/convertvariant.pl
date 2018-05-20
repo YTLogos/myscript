@@ -26,3 +26,5 @@ while (<>) {
   print join "\t", @a;
   print "\n";
 }
+
+#USAGE:usage: perl convertvariant.pl vcffile > outresult.vcf
