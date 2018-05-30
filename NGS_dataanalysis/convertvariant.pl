@@ -20,7 +20,7 @@ while (<>) {
     } elsif ($a[$i] eq "0/1") {
       $a[$i] = "$ref$alt";
     } else {
-      $a[$i] = "-";
+      $a[$i] = "N";
     }
   }
   print join "\t", @a;
