@@ -1,28 +1,28 @@
 
 SNP filtering for all datasets, 23 May 2017 
 
-###remove indels
+### remove indels
 ```
 vcftools --gzvcf MiHiNew_NewOnly2.recode.vcf.gz --remove-indels --recode --recode-INFO-all --out MiHiNew_NewOnly2_noindels
 gzip MiHiNew_NewOnly2_noindels.recode.vcf
 ```
-###select only bialelic sites
+### select only bialelic sites
 ```
 awk '$5 !~ /([[:alpha:]])+,[[:alpha:]]/{print}' MiHiNew_NewOnly2_noindels.recode.vcf > MiHiNew_NewOnly2_noindels_biallelic.vcf
 gzip MiHiNew_NewOnly2_noindels_biallelic.vcf
 ```
-###calculate missingness
+### calculate missingness
 ```
 vcftools --gzvcf MiHiNew_NewOnly2_noindels_biallelic.vcf.gz \
 --missing-indv \
 --out MiHiNew_NewOnly2_noindels_biallelic.vcf
 ```
-###Create list of sampes that meet missingness criteria (from that calculated above)
+### Create list of sampes that meet missingness criteria (from that calculated above)
 ```
 awk ' $5 < 0.9 ' MiHiNew_NewOnly2_noindels_biallelic.vcf.imiss > MiHiNew_NewOnly2_noindels_biallelic_less90miss
 awk '{ print $1 }' MiHiNew_NewOnly2_noindels_biallelic_less90miss > List_MiHiNew_NewOnly2_noindels_biallelic_less90miss
 ```
-###Filter them out
+### Filter them out
 ```
 vcftools --gzvcf MiHiNew_NewOnly2_noindels_biallelic.vcf.gz \
 --keep List_MiHiNew_NewOnly2_noindels_biallelic_less90miss \
@@ -32,7 +32,7 @@ vcftools --gzvcf MiHiNew_NewOnly2_noindels_biallelic.vcf.gz \
 gzip MiHiNew_NewOnly2_noindels_biallelic_less90miss.recode.vcf
 ```
 
-###filter by min/max allele freq cut-off (95 and 5)
+### filter by min/max allele freq cut-off (95 and 5)
 ```
 vcftools --gzvcf MiHiNew_NewOnly2_noindels_biallelic_less90miss.recode.vcf.gz \
 --maf 0.05 \
@@ -42,7 +42,7 @@ vcftools --gzvcf MiHiNew_NewOnly2_noindels_biallelic_less90miss.recode.vcf.gz \
 --out MiHiNew_NewOnly2_noindels_biallelic_less90miss_min05maf95
 ```
 
-###Apply a "Hard" filter to the dataset
+### Apply a "Hard" filter to the dataset
 ```
 bgzip MiHiNew_NewOnly2_noindels_biallelic_less90miss_min05maf95.recode.vcf
 tabix MiHiNew_NewOnly2_noindels_biallelic_less90miss_min05maf95.recode.vcf.gz
@@ -64,12 +64,12 @@ java -Xmx12G -jar GATK-3.3/GenomeAnalysisTK.jar \
 -o MiHiNew_NewOnly2_noindels_biallelic_less90miss_min05maf95_hardfilterannotated.vcf
 ```
 
-###apply the hard fitler - remove SNPs that fail
+### apply the hard fitler - remove SNPs that fail
 ```
 awk '/^#/||$7=="PASS"' MiHiNew_NewOnly2_noindels_biallelic_less90miss_min05maf95_hardfilterannotated.vcf > MiHiNew_NewOnly2_noindels_biallelic_less90miss_min05maf95_hardfiltered.vcf
 ```
 
-###Remove variants with a GQ < 20
+### Remove variants with a GQ < 20
 ```
 vcftools --vcf MiHiNew_NewOnly2_noindels_biallelic_less90miss_min05maf95_hardfiltered.vcf \
 --minGQ 20 \
@@ -80,10 +80,10 @@ vcftools --vcf MiHiNew_NewOnly2_noindels_biallelic_less90miss_min05maf95_hardfil
 
 
 
-####Filtering for RAD1 dataset and subsequent analyses
-#####(Species-level filtering for comparing pop1 and pop2 vs pop7 and pop8)
+### #Filtering for RAD1 dataset and subsequent analyses
+### ##(Species-level filtering for comparing pop1 and pop2 vs pop7 and pop8)
 
-###filter to just species before selecting SNPs based on cov criteria
+### filter to just species before selecting SNPs based on cov criteria
 ```
 vcftools --vcf MiHiNew_NewOnly2_noindels_biallelic_less90miss_min05maf95_hardfiltered_GQ20.recode.vcf \
 --keep PgPc_groupedasspecies \
@@ -91,14 +91,14 @@ vcftools --vcf MiHiNew_NewOnly2_noindels_biallelic_less90miss_min05maf95_hardfil
 --recode-INFO-all \
 --out MiHiNew_NewOnly2_noindels_biallelic_less90miss_min05maf95_hardfiltered_GQ20_PgPcspeciesonly
 ```
-###first bgzip then index file
+### first bgzip then index file
 ```
 set path = ( $path /afs/crc.nd.edu/group/hellmann/hlm_3/Seans_Genomics_data_PgPc/tabix-0.2.6/tabix-0.2.6 )
 bgzip MiHiNew_NewOnly2_noindels_biallelic_less90miss_min05maf95_hardfiltered_GQ20_PgPcspeciesonly.recode.vcf
 tabix MiHiNew_NewOnly2_noindels_biallelic_less90miss_min05maf95_hardfiltered_GQ20_PgPcspeciesonly.recode.vcf.gz
 ```
 
-###find sites with 75% having 6X cov
+### find sites with 75% having 6X cov
 ```
 module load java/1.7
 java -Xmx12G -jar GATK-3.3/GenomeAnalysisTK.jar \
@@ -110,11 +110,11 @@ java -Xmx12G -jar GATK-3.3/GenomeAnalysisTK.jar \
 -out MiHiNew_NewOnly2_noindels_biallelic_less90miss_min05maf95_hardfiltered_GQ20_PgPcspeciesonly_6X75ind
 -nt 6
 ```
-###need to make tab delimited
+### need to make tab delimited
 ```
 awk -F":" '$1=$1' OFS="\t" MiHiNew_NewOnly2_noindels_biallelic_less90miss_min05maf95_hardfiltered_GQ20_PgPcspeciesonly_6X75ind > SNPs_MiHiNew_NewOnly2_noindels_biallelic_less90miss_min05maf95_hardfiltered_GQ20_PgPcspeciesonly_6X75ind.txt
 
-###now filter for just these sites
+### now filter for just these sites
 vcftools --gzvcf MiHiNew_NewOnly2_noindels_biallelic_less90miss_min05maf95_hardfiltered_GQ20_PgPcspeciesonly.recode.vcf.gz \
 --positions SNPs_MiHiNew_NewOnly2_noindels_biallelic_less90miss_min05maf95_hardfiltered_GQ20_PgPcspeciesonly_6X75ind.txt \
 --recode \
@@ -122,7 +122,7 @@ vcftools --gzvcf MiHiNew_NewOnly2_noindels_biallelic_less90miss_min05maf95_hardf
 --out Variants_MiHiNew_NewOnly2_noindels_biallelic_less90miss_min05maf95_hardfiltered_GQ20_PgPcspeciesonly_6X75ind
 ```
 
-###remove sites that are not polymorphic (for some reason PGDspider is not doing this); can use the 3X because it includes the 6X
+### remove sites that are not polymorphic (for some reason PGDspider is not doing this); can use the 3X because it includes the 6X
 ```
 vcftools --vcf Variants_MiHiNew_NewOnly2_noindels_biallelic_less90miss_min05maf95_hardfiltered_GQ20_PgPcspeciesonly_6X75ind.recode.vcf \
 --exclude-positions sites_monomorphic_3X \
@@ -130,7 +130,7 @@ vcftools --vcf Variants_MiHiNew_NewOnly2_noindels_biallelic_less90miss_min05maf9
 --recode-INFO-all \
 --out Variants_MiHiNew_NewOnly2_noindels_biallelic_less90miss_min05maf95_hardfiltered_GQ20_PgPcspeciesonly_6X75ind_poly
 ```
-#####CONVERT VCF TO BAYESCAN FILE FORMAT
+### ##CONVERT VCF TO BAYESCAN FILE FORMAT
 ```
 module load java/1.7
 java -Xmx1024m -Xms512m -jar PGDSpider2-cli.jar \
@@ -140,7 +140,7 @@ java -Xmx1024m -Xms512m -jar PGDSpider2-cli.jar \
 -outputformat GESTE_BAYE_SCAN \
 -spid VCFtoBAYESCAN.spid
 ```
-####CONVERT VCF TO ARLEQUIN FILE FORMAT
+### #CONVERT VCF TO ARLEQUIN FILE FORMAT
 ```
 module load java/1.7
 java -Xmx1024m -Xms512m -jar PGDSpider2-cli.jar \
@@ -152,7 +152,7 @@ java -Xmx1024m -Xms512m -jar PGDSpider2-cli.jar \
 ```
 
 ```
-###need to add this to the end of the Arlequin file
+### need to add this to the end of the Arlequin file
 #
 #
 #
@@ -175,7 +175,7 @@ java -Xmx1024m -Xms512m -jar PGDSpider2-cli.jar \
 
 ```
 
-####DETERMINE CHROMOSOME ASSIGNMENT
+### #DETERMINE CHROMOSOME ASSIGNMENT
 ```
 #make dictionary file for protein database
 makeblastdb -in silkpep.fa -dbtype prot
@@ -190,7 +190,7 @@ grep '>' silkpep.fa > silkpep_used_for_nscaf_info.txt
 
 
 
-###calculate Fst
+### calculate Fst
 ```
 vcftools --vcf Variants_MiHiNew_NewOnly2_noindels_biallelic_less90miss_min05maf95_hardfiltered_GQ20_PgPcspeciesonly_6X75ind_poly.recode.vcf \
 --weir-fst-pop Pg_species_list \
@@ -198,14 +198,14 @@ vcftools --vcf Variants_MiHiNew_NewOnly2_noindels_biallelic_less90miss_min05maf9
 --out Variants_MiHiNew_NewOnly2_noindels_biallelic_less90miss_min05maf95_hardfiltered_GQ20_PgPcspeciesonly_6X75ind_poly_PgvsPc
 ```
 
-###calculate pi for (pure) P. glaucus populations 
+### calculate pi for (pure) P. glaucus populations 
 ```
 vcftools --vcf Variants_MiHiNew_NewOnly2_noindels_biallelic_less90miss_min05maf95_hardfiltered_GQ20_PgPcspeciesonly_6X75ind_poly.recode.vcf \
 --keep Pg_species_list \
 --site-pi \
 --out Variants_MiHiNew_NewOnly2_noindels_biallelic_less90miss_min05maf95_hardfiltered_GQ20_PgPcspeciesonly_6X75ind_poly_Pg
 ```
-###calculate pi for (pure) P. canadensis populations 
+### calculate pi for (pure) P. canadensis populations 
 ```
 vcftools --vcf Variants_MiHiNew_NewOnly2_noindels_biallelic_less90miss_min05maf95_hardfiltered_GQ20_PgPcspeciesonly_6X75ind_poly.recode.vcf \
 --keep Pc_species_list \
@@ -213,7 +213,7 @@ vcftools --vcf Variants_MiHiNew_NewOnly2_noindels_biallelic_less90miss_min05maf9
 --out Variants_MiHiNew_NewOnly2_noindels_biallelic_less90miss_min05maf95_hardfiltered_GQ20_PgPcspeciesonly_6X75ind_poly_Pc
 ```
 
-###calculate het for all individuals
+### calculate het for all individuals
 ```
 vcftools --vcf Variants_MiHiNew_NewOnly2_noindels_biallelic_less90miss_min05maf95_hardfiltered_GQ20_PgPcspeciesonly_6X75ind_poly.recode.vcf \
 --het \
@@ -222,16 +222,16 @@ vcftools --vcf Variants_MiHiNew_NewOnly2_noindels_biallelic_less90miss_min05maf9
 
 
 
-#####Filtering for RAD2 dataset and subsequent analyses
-#####(fitlering across all populations; all individuals)
+### ##Filtering for RAD2 dataset and subsequent analyses
+### ##(fitlering across all populations; all individuals)
 
-###bgzip then index file
+### bgzip then index file
 ```
 bgzip MiHiNew_NewOnly2_noindels_biallelic_less90miss_min05maf95_hardfiltered_GQ20.recode.vcf
 tabix MiHiNew_NewOnly2_noindels_biallelic_less90miss_min05maf95_hardfiltered_GQ20.recode.vcf.gz
 ```
 
-###find sites with 75% having 6X cov USING ALL POPULATIONS
+### find sites with 75% having 6X cov USING ALL POPULATIONS
 ```
 module load java/1.7
 java -Xmx12G -jar GenomeAnalysisTK.jar \
@@ -243,12 +243,12 @@ java -Xmx12G -jar GenomeAnalysisTK.jar \
 -out MiHiNew_NewOnly2_noindels_biallelic_less90miss_min05maf95_hardfiltered_GQ20_6X75ind_allpops \
 -nt 12
 ```
-###need to make tab deliminted
+### need to make tab deliminted
 ```
 awk -F":" '$1=$1' OFS="\t" MiHiNew_NewOnly2_noindels_biallelic_less90miss_min05maf95_hardfiltered_GQ20_6X75ind_allpops > SNPs_hardfiltered_GQ20_6X75ind_allpops.txt
 ```
 
-###filter for just these sites
+### filter for just these sites
 ```
 vcftools --gzvcf MiHiNew_NewOnly2_noindels_biallelic_less90miss_min05maf95_hardfiltered_GQ20.recode.vcf.gz \
 --positions SNPs_hardfiltered_GQ20_6X75ind_allpops.txt \
@@ -285,7 +285,7 @@ vcftools --vcf Variants_MiHiNew_NewOnly2_noindels_biallelic_less90miss_min05maf9
 ```
 
 
-###Ouptut list of "RAD2" loci
+### Ouptut list of "RAD2" loci
 ```
 output list of loci
 vcftools --vcf Variants_MiHiNew_NewOnly2_noindels_biallelic_less90miss_min05maf95_hardfiltered_GQ20_6X75ind_allpops_31Xmean.recode.vcf \
@@ -293,30 +293,30 @@ vcftools --vcf Variants_MiHiNew_NewOnly2_noindels_biallelic_less90miss_min05maf9
 --out Variants_MiHiNew_NewOnly2_noindels_biallelic_less90miss_min05maf95_hardfiltered_GQ20_6X75ind_allpops_31Xmean
 ```
 
-###Assess sites out of HWE in the parental populations (P. glaucus)
+### Assess sites out of HWE in the parental populations (P. glaucus)
 ```
 vcftools --vcf Variants_MiHiNew_NewOnly2_noindels_biallelic_less90miss_min05maf95_hardfiltered_GQ20_6X75ind_allpops_31Xmean.recode.vcf \
 --keep Pg_species_list \
 --hardy \
 --out Variants_MiHiNew_NewOnly2_noindels_biallelic_less90miss_min05maf95_hardfiltered_GQ20_6X75ind_allpops_31Xmean_Pg_HWE
 ```
-###Assess sites out of HWE in the parental populations (P. canadensis)
+### Assess sites out of HWE in the parental populations (P. canadensis)
 ```
 vcftools --vcf Variants_MiHiNew_NewOnly2_noindels_biallelic_less90miss_min05maf95_hardfiltered_GQ20_6X75ind_allpops_31Xmean.recode.vcf \
 --keep Pc_species_list \
 --hardy \
 --out Variants_MiHiNew_NewOnly2_noindels_biallelic_less90miss_min05maf95_hardfiltered_GQ20_6X75ind_allpops_31Xmean_Pc_HWE
 ```
-###Combine output for both species populations
+### Combine output for both species populations
 ```
 awk '{print > "PgandPc_HardGQ20_6X_31Xmean_HWE"}' Variants_MiHiNew_NewOnly2_noindels_biallelic_less90miss_min05maf95_hardfiltered_GQ20_6X75ind_allpops_31Xmean_Pg_HWE.hwe Variants_MiHiNew_NewOnly2_noindels_biallelic_less90miss_min05maf95_hardfiltered_GQ20_6X75ind_allpops_31Xmean_Pc_HWE.hwe
 ```
-###create a list of scaffolds to remove -- scaffolds with a p value < 0.01
+### create a list of scaffolds to remove -- scaffolds with a p value < 0.01
 ```
 awk '$6<0.01' PgandPc_HardGQ20_6X_31Xmean_HWE | sort | uniq > PgandPc_HardGQ20_6X_31Xmean_not_in_HWE
 awk '{print $1" "$2}' PgandPc_HardGQ20_6X_31Xmean_not_in_HWE > PgandPc_HardGQ20_6X_31Xmean_sites_not_in_HWE
 ```
-###Apply HWE filter
+### Apply HWE filter
 ```
 vcftools --vcf Variants_MiHiNew_NewOnly2_noindels_biallelic_less90miss_min05maf95_hardfiltered_GQ20_6X75ind_allpops_31Xmean.recode.vcf \
 --exclude-positions PgandPc_HardGQ20_6X_31Xmean_sites_not_in_HWE \
@@ -326,7 +326,7 @@ vcftools --vcf Variants_MiHiNew_NewOnly2_noindels_biallelic_less90miss_min05maf9
 ```
 
 
-###Filter for sites that were identified as outliers using Bayescan and Arlequin - selected the 1st SNP for 1kb "windows"
+### Filter for sites that were identified as outliers using Bayescan and Arlequin - selected the 1st SNP for 1kb "windows"
 ```
 vcftools --vcf Variants_MiHiNew_NewOnly2_noindels_biallelic_less90miss_min05maf95_hardfiltered_GQ20_6X75ind_allpops_31Xmean_HWE.recode.vcf \
 --positions Diversifying_outliers_1kb \
@@ -334,13 +334,13 @@ vcftools --vcf Variants_MiHiNew_NewOnly2_noindels_biallelic_less90miss_min05maf9
 --recode-INFO-all \
 --out Variants_MiHiNew_NewOnly2_noindels_biallelic_less90miss_min05maf95_hardfiltered_GQ20_6X75ind_allpops_31Xmean_HWE_outliers_1kb
 ```
-###print loci IDs for this filtered dataset
+### print loci IDs for this filtered dataset
 ```
 grep -v ^# Variants_MiHiNew_NewOnly2_noindels_biallelic_less90miss_min05maf95_hardfiltered_GQ20_6X75ind_allpops_31Xmean_HWE_outliers_1kb.recode.vcf | awk '{print $1, $2}' > Variants_MiHiNew_NewOnly2_noindels_biallelic_less90miss_min05maf95_hardfiltered_GQ20_6X75ind_allpops_31Xmean_HWE_outliers_1kb.recode.loci
 ```
 
 
-###Calculate allele freq for clinal loci for each population
+### Calculate allele freq for clinal loci for each population
 ```
 vcftools --vcf Variants_MiHiNew_NewOnly2_noindels_biallelic_less90miss_min05maf95_hardfiltered_GQ20_6X75ind_allpops_31Xmean_HWE_outliers_1kb.recode.vcf \
 --keep POP_1_NEW\
@@ -383,7 +383,7 @@ vcftools --vcf Variants_MiHiNew_NewOnly2_noindels_biallelic_less90miss_min05maf9
 --out SNPs_hard_6X_31Xmean_HWE_outliers_all_POP_8
 ```
 
-###print just alleles freq, remove header, split columns by semi colon, print just one of the allele frequencies (second column), transpose allele frequencies
+### print just alleles freq, remove header, split columns by semi colon, print just one of the allele frequencies (second column), transpose allele frequencies
 ```
 cat SNPs_hard_6X_31Xmean_HWE_outliers_all_POP_1.frq | cut -f 5,6 | tail -n +2 | awk '{ gsub(":", " ") } 1' | cut -f 2 | awk '{print $2}' | tr "\n" "\t" > AF_POP_1_SNPs_hard_6X_31Xmean_HWE_outliers_all
 cat SNPs_hard_6X_31Xmean_HWE_outliers_all_POP_2.frq | cut -f 5,6 | tail -n +2 | awk '{ gsub(":", " ") } 1' | cut -f 2 | awk '{print $2}' | tr "\n" "\t" > AF_POP_2_SNPs_hard_6X_31Xmean_HWE_outliers_all
@@ -395,17 +395,17 @@ cat SNPs_hard_6X_31Xmean_HWE_outliers_all_POP_7.frq | cut -f 5,6 | tail -n +2 | 
 cat SNPs_hard_6X_31Xmean_HWE_outliers_all_POP_8.frq | cut -f 5,6 | tail -n +2 | awk '{ gsub(":", " ") } 1' | cut -f 2 | awk '{print $2}' | tr "\n" "\t" > AF_POP_8_SNPs_hard_6X_31Xmean_HWE_outliers_all
 ```
 
-###Append them all together
+### Append them all together
 ```
 awk '{print > "AF_All_hard_6X_31Xmean_HWE_outliers_all"}' AF_POP_1_SNPs_hard_6X_31Xmean_HWE_outliers_all AF_POP_2_SNPs_hard_6X_31Xmean_HWE_outliers_all AF_POP_3_SNPs_hard_6X_31Xmean_HWE_outliers_all AF_POP_4_SNPs_hard_6X_31Xmean_HWE_outliers_all AF_POP_5_SNPs_hard_6X_31Xmean_HWE_outliers_all AF_POP_6_SNPs_hard_6X_31Xmean_HWE_outliers_all AF_POP_7_SNPs_hard_6X_31Xmean_HWE_outliers_all AF_POP_8_SNPs_hard_6X_31Xmean_HWE_outliers_all
 ```
 
-###Create vector of loci IDs (same loci used for all)
+### Create vector of loci IDs (same loci used for all)
 ```
 cat SNPs_hard_6X_31Xmean_HWE_outliers_all_POP_8.frq | cut -f 1,2 | tail -n +2 | tr "\t" "." | tr "\n" "\t" > AF_All_POPs_SNPs_hard_6X_31Xmean_HWE_outliers_all_Loci_IDs
 ```
 
-###Determine number of individuals used to calc allele freq from above
+### Determine number of individuals used to calc allele freq from above
 ```
 cat SNPs_hard_6X_31Xmean_HWE_outliers_all_POP_1.frq | cut -f 4 | tail -n +2 | tr "\n" "\t" > AF_POP_1_SNPs_hard_6X_31Xmean_HWE_outliers_all_n
 cat SNPs_hard_6X_31Xmean_HWE_outliers_all_POP_2.frq | cut -f 4 | tail -n +2 | tr "\n" "\t" > AF_POP_2_SNPs_hard_6X_31Xmean_HWE_outliers_all_n
@@ -416,15 +416,15 @@ cat SNPs_hard_6X_31Xmean_HWE_outliers_all_POP_6.frq | cut -f 4 | tail -n +2 | tr
 cat SNPs_hard_6X_31Xmean_HWE_outliers_all_POP_7.frq | cut -f 4 | tail -n +2 | tr "\n" "\t" > AF_POP_7_SNPs_hard_6X_31Xmean_HWE_outliers_all_n
 cat SNPs_hard_6X_31Xmean_HWE_outliers_all_POP_8.frq | cut -f 4 | tail -n +2 | tr "\n" "\t" > AF_POP_8_SNPs_hard_6X_31Xmean_HWE_outliers_all_n
 ```
-###Now, need to append them all together
+### Now, need to append them all together
 ```
 awk '{print > "All_POPs_SNPs_hard_6X_31Xmean_HWE_outliers_all_n"}' AF_POP_1_SNPs_hard_6X_31Xmean_HWE_outliers_all_n AF_POP_2_SNPs_hard_6X_31Xmean_HWE_outliers_all_n AF_POP_3_SNPs_hard_6X_31Xmean_HWE_outliers_all_n AF_POP_4_SNPs_hard_6X_31Xmean_HWE_outliers_all_n AF_POP_5_SNPs_hard_6X_31Xmean_HWE_outliers_all_n AF_POP_6_SNPs_hard_6X_31Xmean_HWE_outliers_all_n AF_POP_7_SNPs_hard_6X_31Xmean_HWE_outliers_all_n AF_POP_8_SNPs_hard_6X_31Xmean_HWE_outliers_all_n
 ```
 
 
 
-###Scripts for processing Hzar output
-###Remove spaces from file names  (need to be in BASH shell)
+### Scripts for processing Hzar output
+### Remove spaces from file names  (need to be in BASH shell)
 ```
 find . -name '* *' | while read file; do target=`echo "$file" | sed 's/ /_/g'`; echo "Renaming '$file' to '$target'"; mv "$file" "$target"; done;
 
@@ -440,12 +440,12 @@ mkdir Fuzzyclines_for_selectedmodels
 mkdir Comparing16models
 mkdir AICtables
 ```
-###Move files into appropriate folders
+### Move files into appropriate folders
 ```
 mv scaffold_* Results/
 ```
 
-####move files with the same extension into a different directory
+### #move files with the same extension into a different directory
 ```
 mv *AICc_table_for_all_models.txt Results/AICtables/
 mv *tracemodel* Results/Tracemodels/
@@ -459,7 +459,7 @@ mv *_MaxLL_params_for_selected_model.txt Results/MaxLL_params_for_selected_model
 mv *_check* Results/CheckFit_related_files/
 mv *_Check* Results/CheckFit_related_files/
 ```
-####Merge all files (tables) in a single folder adding the file name to the first column in each row
+### #Merge all files (tables) in a single folder adding the file name to the first column in each row
 
 #In AIC folder directory
 ```
@@ -482,9 +482,9 @@ grep "" *.txt > MaxLL_params_6X_13Xmean_selected_models
 
 
 
-###Create dataset to use for determing genetic structure
+### Create dataset to use for determing genetic structure
 
-###Filter for 1 kb SNPs (Rad2 dataset)
+### Filter for 1 kb SNPs (Rad2 dataset)
 ```
 vcftools --vcf Variants_MiHiNew_NewOnly2_noindels_biallelic_less90miss_min05maf95_hardfiltered_GQ20_6X75ind_allpops_31Xmean.recode.vcf \
 --positions 6X_31Xmean_1kb \
@@ -492,11 +492,11 @@ vcftools --vcf Variants_MiHiNew_NewOnly2_noindels_biallelic_less90miss_min05maf9
 --recode-INFO-all \
 --out Variants_MiHiNew_NewOnly2_noindels_biallelic_less90miss_min05maf95_hardfiltered_GQ20_6X75ind_allpops_31Xmean_1kb
 ```
-###print list of loci
+### print list of loci
 ```
 grep -v ^# Variants_MiHiNew_NewOnly2_noindels_biallelic_less90miss_min05maf95_hardfiltered_GQ20_6X75ind_allpops_31Xmean_1kb.recode.vcf | awk '{print $1, $2}' > Variants_MiHiNew_NewOnly2_noindels_biallelic_less90miss_min05maf95_hardfiltered_GQ20_6X75ind_allpops_31Xmean_1kb.loci.txt
 ```
-###convert vcf to structure format
+### convert vcf to structure format
 ```
 module load java/1.7
 java -Xmx1024m -Xms512m -jar PGDSpider2-cli.jar \
@@ -510,11 +510,11 @@ java -Xmx1024m -Xms512m -jar PGDSpider2-cli.jar \
 
 
 
-################################
-#####Dataset for Introgress - loci with Fst > 0.9 (weir and cockerman) and 1 SNP per 1 kb
+### ### ### ### ### ### ### ### ### ### ##
+### ##Dataset for Introgress - loci with Fst > 0.9 (weir and cockerman) and 1 SNP per 1 kb
 
-####First, in excel make a list from the 31Xmean_1kb dataset and select only SNPs with Fst > 0.9
-####Then, select only these sites
+### #First, in excel make a list from the 31Xmean_1kb dataset and select only SNPs with Fst > 0.9
+### #Then, select only these sites
 ```
 vcftools --vcf .recode.vcf \
 --positions List_loci_for_introgress_6Xhard_1kb \
@@ -525,9 +525,9 @@ vcftools --vcf .recode.vcf \
 
 
 
-###Calcualte r2 without using loop to be used to calucte LD decay
+### Calcualte r2 without using loop to be used to calucte LD decay
 
-###Use sites > 100 bp apart
+### Use sites > 100 bp apart
 ```
 vcftools --vcf Variants_MiHiNew_NewOnly2_noindels_biallelic_less90miss_min05maf95_hardfiltered_GQ20_6X75ind_allpops_31Xmean.recode.vcf \
 --positions HardFiltered_SNPs_100bp \
@@ -535,20 +535,20 @@ vcftools --vcf Variants_MiHiNew_NewOnly2_noindels_biallelic_less90miss_min05maf9
 --recode-INFO-all \
 --out Variants_MiHiNew_NewOnly2_noindels_biallelic_less90miss_min05maf95_hardfiltered_GQ20_6X75ind_allpops_31Xmean_100bp
 ```
-###make plink file
+### make plink file
 ```
 vcftools --vcf Variants_MiHiNew_NewOnly2_noindels_biallelic_less90miss_min05maf95_hardfiltered_GQ20_6X75ind_allpops_31Xmean_100bp.recode.vcf \
 --plink \
 --out Variants_MiHiNew_NewOnly2_noindels_biallelic_less90miss_min05maf95_hardfiltered_GQ20_6X75ind_allpops_31Xmean_100bp_plink
 ```
-####Add chrom numbers to map file in excel (a unique number to each scaffold)
-####label new file: "Variants_MiHiNew_NewOnly2_noindels_biallelic_less90miss_min05maf95_hardfiltered_GQ20_6X75ind_allpops_31Xmean_100bp_plink_chrom.map"
+### #Add chrom numbers to map file in excel (a unique number to each scaffold)
+### #label new file: "Variants_MiHiNew_NewOnly2_noindels_biallelic_less90miss_min05maf95_hardfiltered_GQ20_6X75ind_allpops_31Xmean_100bp_plink_chrom.map"
 
-####Convert plink file into 12coded plink file
+### #Convert plink file into 12coded plink file
 ```
 plink-1.07-x86_64/plink --file Variants_MiHiNew_NewOnly2_noindels_biallelic_less90miss_min05maf95_hardfiltered_GQ20_6X75ind_allpops_31Xmean_100bp_plink_chrom --recode12 --out Variants_MiHiNew_NewOnly2_noindels_biallelic_less90miss_min05maf95_hardfiltered_GQ20_6X75ind_allpops_31Xmean_100bp_plink_chrom_12
 ```
-###make files with shorter names
+### make files with shorter names
 ```
 cp Variants_MiHiNew_NewOnly2_noindels_biallelic_less90miss_min05maf95_hardfiltered_GQ20_6X75ind_allpops_31Xmean_100bp_plink_chrom_12.ped GQ20_6X75ind_allpops_31Xmean_100bp_plink_chrom_12.ped
 
@@ -562,8 +562,8 @@ cp Variants_MiHiNew_NewOnly2_noindels_biallelic_less90miss_min05maf95_hardfilter
 cp Variants_MiHiNew_NewOnly2_noindels_biallelic_less90miss_min05maf95_hardfiltered_GQ20_6X75ind_allpops_31Xmean_100bp_plink_chrom.map POP_8_all_plinkfile12.map
 ```
 
-###Calculate r2 for each population
-####clear all variables
+### Calculate r2 for each population
+### #clear all variables
 ```
 rm POP_1_100bp_Iterative_r2_hard
 rm POP_1_100bp_r2_mean_i
@@ -592,12 +592,12 @@ rm Subsetted_GQ20_6X75ind_allpops_31Xmean_100bp_plink_chrom_12_POP_1*
 
 ```
 
-###process output for input into R
+### process output for input into R
 ```
 #create header
 head -n 1 POP_1_100bp_Iterative_r2_hard > r2_dist_POPs_100bp_forR_header
 ```
-###print columns to use and remove the multiple headers from each file
+### print columns to use and remove the multiple headers from each file
 ```
 grep -v 'R2' POP_1_100bp_Iterative_r2_hard > r2_POP_1.1_100bp_forR
 awk '{print > "r2_POP_1.1_100bp_forR.txt"}' r2_dist_POPs_100bp_forR_header r2_POP_1.1_100bp_forR
@@ -633,7 +633,7 @@ awk '{print > "r2_POP_8.1_100bp_forR.txt"}' r2_dist_POPs_100bp_forR_header r2_PO
 
 
 
-###Calculate Fis for each population
+### Calculate Fis for each population
 ```
 vcftools --vcf Variants_MiHiNew_NewOnly2_noindels_biallelic_less90miss_min05maf95_hardfiltered_GQ20_6X75ind_allpops_31Xmean.recode.vcf \
 --keep POP_1_NEW \
@@ -675,7 +675,7 @@ vcftools --vcf Variants_MiHiNew_NewOnly2_noindels_biallelic_less90miss_min05maf9
 --het \
 --out Variants_MiHiNew_NewOnly2_noindels_biallelic_less90miss_min05maf95_hardfiltered_GQ20_6X75ind_allpops_31Xmean_POP8
 ```
-###comnbine them all together
+### comnbine them all together
 ```
 cat Variants_MiHiNew_NewOnly2_noindels_biallelic_less90miss_min05maf95_hardfiltered_GQ20_6X75ind_allpops_31Xmean_POP1.het Variants_MiHiNew_NewOnly2_noindels_biallelic_less90miss_min05maf95_hardfiltered_GQ20_6X75ind_allpops_31Xmean_POP2.het Variants_MiHiNew_NewOnly2_noindels_biallelic_less90miss_min05maf95_hardfiltered_GQ20_6X75ind_allpops_31Xmean_POP3.het Variants_MiHiNew_NewOnly2_noindels_biallelic_less90miss_min05maf95_hardfiltered_GQ20_6X75ind_allpops_31Xmean_POP4.het Variants_MiHiNew_NewOnly2_noindels_biallelic_less90miss_min05maf95_hardfiltered_GQ20_6X75ind_allpops_31Xmean_POP5.het Variants_MiHiNew_NewOnly2_noindels_biallelic_less90miss_min05maf95_hardfiltered_GQ20_6X75ind_allpops_31Xmean_POP6.het Variants_MiHiNew_NewOnly2_noindels_biallelic_less90miss_min05maf95_hardfiltered_GQ20_6X75ind_allpops_31Xmean_POP7.het Variants_MiHiNew_NewOnly2_noindels_biallelic_less90miss_min05maf95_hardfiltered_GQ20_6X75ind_allpops_31Xmean_POP8.het > Het_6X_hard_31Xmean_all_pops
 ```
@@ -684,7 +684,7 @@ cat Variants_MiHiNew_NewOnly2_noindels_biallelic_less90miss_min05maf95_hardfilte
 
 
 
-###Calculate pi for each population
+### Calculate pi for each population
 ```
 vcftools --vcf Variants_MiHiNew_NewOnly2_noindels_biallelic_less90miss_min05maf95_hardfiltered_GQ20_6X75ind_allpops_31Xmean.recode.vcf \
 --keep POP_1_NEW \
@@ -726,7 +726,7 @@ vcftools --vcf Variants_MiHiNew_NewOnly2_noindels_biallelic_less90miss_min05maf9
 --site-pi \
 --out Variants_MiHiNew_NewOnly2_noindels_biallelic_less90miss_min05maf95_hardfiltered_GQ20_6X75ind_allpops_31Xmean_POP8
 ```
-### now compile the output - add population info to each file and remove headers
+###  now compile the output - add population info to each file and remove headers
 ```
 awk '{print $3, "\t 1"}' Variants_MiHiNew_NewOnly2_noindels_biallelic_less90miss_min05maf95_hardfiltered_GQ20_6X75ind_allpops_31Xmean_POP1.sites.pi > pi_POP_1_hard
 awk '{print $3, "\t 2"}' Variants_MiHiNew_NewOnly2_noindels_biallelic_less90miss_min05maf95_hardfiltered_GQ20_6X75ind_allpops_31Xmean_POP2.sites.pi > pi_POP_2_hard
@@ -737,11 +737,11 @@ awk '{print $3, "\t 6"}' Variants_MiHiNew_NewOnly2_noindels_biallelic_less90miss
 awk '{print $3, "\t 7"}' Variants_MiHiNew_NewOnly2_noindels_biallelic_less90miss_min05maf95_hardfiltered_GQ20_6X75ind_allpops_31Xmean_POP7.sites.pi > pi_POP_7_hard
 awk '{print $3, "\t 8"}' Variants_MiHiNew_NewOnly2_noindels_biallelic_less90miss_min05maf95_hardfiltered_GQ20_6X75ind_allpops_31Xmean_POP8.sites.pi > pi_POP_8_hard
 ```
-###create header
+### create header
 ```
 head -n 1 pi_POP_1_hard | awk '{print $1, "\t Population"}' > pi_POPs_hard_header
 ```
-###remove header from individual population files
+### remove header from individual population files
 ```
 awk '{if (NR!=1) {print}}' pi_POP_1_hard > pi_POP_1.1_hard
 awk '{if (NR!=1) {print}}' pi_POP_2_hard > pi_POP_2.1_hard
@@ -752,7 +752,7 @@ awk '{if (NR!=1) {print}}' pi_POP_6_hard > pi_POP_6.1_hard
 awk '{if (NR!=1) {print}}' pi_POP_7_hard > pi_POP_7.1_hard
 awk '{if (NR!=1) {print}}' pi_POP_8_hard > pi_POP_8.1_hard
 ```
-###Combine all files together with a header
+### Combine all files together with a header
 ```
 awk '{print > "pi_6X_hard_31Xmean_all_pops.txt"}' pi_POPs_hard_header pi_POP_1.1_hard pi_POP_2.1_hard pi_POP_3.1_hard pi_POP_4.1_hard pi_POP_5.1_hard pi_POP_6.1_hard pi_POP_7.1_hard pi_POP_8.1_hard
 ```
