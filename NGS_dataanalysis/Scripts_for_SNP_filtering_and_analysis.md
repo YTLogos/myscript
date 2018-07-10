@@ -256,26 +256,26 @@ vcftools --gzvcf MiHiNew_NewOnly2_noindels_biallelic_less90miss_min05maf95_hardf
 --recode-INFO-all \
 --out Variants_MiHiNew_NewOnly2_noindels_biallelic_less90miss_min05maf95_hardfiltered_GQ20_6X75ind_allpops
 ```
-##calculate missingness by individual
+### calculate missingness by individual
 ```
 vcftools --vcf Variants_MiHiNew_NewOnly2_noindels_biallelic_less90miss_min05maf95_hardfiltered_GQ20_6X75ind_allpops.recode.vcf \
 --missing-indv \
 --out Variants_MiHiNew_NewOnly2_noindels_biallelic_less90miss_min05maf95_hardfiltered_GQ20_6X75ind_allpops
 ```
-##calculate heterozygosity by individual
+### calculate heterozygosity by individual
 ```
 vcftools --vcf Variants_MiHiNew_NewOnly2_noindels_biallelic_less90miss_min05maf95_hardfiltered_GQ20_6X75ind_allpops.recode.vcf \
 --het \
 --out Variants_MiHiNew_NewOnly2_noindels_biallelic_less90miss_min05maf95_hardfiltered_GQ20_6X75ind_allpops
 ```
-##calculate mean depth by individual
+### calculate mean depth by individual
 ```
 vcftools --vcf Variants_MiHiNew_NewOnly2_noindels_biallelic_less90miss_min05maf95_hardfiltered_GQ20_6X75ind_allpops.recode.vcf \
 --depth \
 --out Variants_MiHiNew_NewOnly2_noindels_biallelic_less90miss_min05maf95_hardfiltered_GQ20_6X75ind_allpops
 ```
 
-##remove individuals with less than 14X MEAN coverage
+### remove individuals with less than 14X MEAN coverage
 ```
 vcftools --vcf Variants_MiHiNew_NewOnly2_noindels_biallelic_less90miss_min05maf95_hardfiltered_GQ20_6X75ind_allpops.recode.vcf \
 --keep List_14X_Meancoverage \
