@@ -461,7 +461,7 @@ mv *_Check* Results/CheckFit_related_files/
 ```
 ### Merge all files (tables) in a single folder adding the file name to the first column in each row
 
-###In AIC folder directory
+### In AIC folder directory
 ```
 grep "" *.txt > AICtable_for_6X_13Xmean_SNPs
 
