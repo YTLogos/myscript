@@ -1,3 +1,7 @@
+library(tidyverse)
+# devtools::install_github("EmilHvitfeldt/paletteer")
+library(paletteer)
+library(lubridate)
 barchart_theme <-  theme(axis.text.y   = element_text(size=13, face="bold", colour = "black"),
                   axis.text.x   = element_text(size=13, face="bold", colour = "black"),
                   axis.title.x  = element_text(size=13, face="bold"),
