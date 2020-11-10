@@ -8,7 +8,6 @@ set -o pipefail
 
 ## The path to the required software, the reference genome, and the file path.
 
-fastp=/home/taoyan/biosoft/fastp/fastp
 bwa=/home/taoyan/biosoft/bwa/bwa
 samtools=/home/taoyan/biosoft/samtools1.9/bin/samtools
 reference=/database/reference/Bna_ZS11/ZS11_chr/ZS11_chr.fasta
@@ -28,12 +27,20 @@ $gatk CreateSequenceDictionary \
 
 ## The second step is the sequencing data quality control, all sample names are stored in a txt file, one line per sample name, sample_id.txt
 
+## fastp is also OK 
+
+#for i in `cat sample_id.txt`
+#do
+#$fastp -i $seq_data/${i}_1.fq.gz \
+#-o $seq_data/${i}_good_1.fq.gz \
+#-I $seq_data/${i}_2.fq.gz \
+#-O $seq_data/${i}_good_2.fq.gz
+
+
 for i in `cat sample_id.txt`
 do
-$fastp -i $seq_data/${i}_1.fq.gz \
--o $seq_data/${i}_good_1.fq.gz \
--I $seq_data/${i}_2.fq.gz \
--O $seq_data/${i}_good_2.fq.gz
+java -jar /home/taoyan/biosoft/Trimmomatic-0.30/trimmomatic-0.30.jar PE \ -threads 20 -phred33 $seq_data/${i}_1.fq.gz $seq_data/${i}_2.fq.gz \ $seq_data/${i}_good_1.fq.gz $seq_data/${i}_unpaired_1.fq.gz $seq_data/${i}_good_2.fq.gz $seq_data/${i}_unpaired_2.fq.gz \ ILLUMINACLIP:/home/taoyan/biosoft/Trimmomatic-0.30/adapters/TruSeq3-PE.fa:2:30:10 \ LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:50
+done
 
 ## The third step BWA MEM align, bwa mem is very effective for any reads longer than 40bp but less than 2000bp.
 ## To save time, here we use samtools to sort the generated files directly to generate the bam file
