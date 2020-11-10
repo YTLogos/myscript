@@ -201,3 +201,11 @@ $gatk --java-options "-Xmx120G -Djava.io.tmpdir=/database/tmp/" SelectVariants \
 --exclude-filtered \
 -O $vcf_data/Bna.ZS11.indel.pass.vcf.gz
 
+## Annotate SNPs
+
+java -jar -Xms64G -Xmx96G "-Djava.io.tmpdir=/database/tmp/" /home/taoyan/biosoft/snpEff/snpEff.jar ZS11 $vcf_data/Bna.ZS11.HC.snp.pass.final.vcf.gz > $vcf_data/Bna.ZS11.HC.snp.pass.final.anno.vcf
+
+/home/taoyan/biosoft/htslib1.9/bin/bgzip < $vcf_data/Bna.ZS11.HC.snp.pass.final.anno.vcf > $vcf_data/Bna.ZS11.HC.snp.pass.final.anno.vcf.gz
+
+/home/taoyan/biosoft/htslib1.9/bin/tabix -p vcf $vcf_data/Bna.ZS11.HC.snp.pass.final.anno.vcf.gz
+
