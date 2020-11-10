@@ -39,7 +39,11 @@ $gatk CreateSequenceDictionary \
 
 for i in `cat sample_id.txt`
 do
-java -jar /home/taoyan/biosoft/Trimmomatic-0.30/trimmomatic-0.30.jar PE \ -threads 20 -phred33 $seq_data/${i}_1.fq.gz $seq_data/${i}_2.fq.gz \ $seq_data/${i}_good_1.fq.gz $seq_data/${i}_unpaired_1.fq.gz $seq_data/${i}_good_2.fq.gz $seq_data/${i}_unpaired_2.fq.gz \ ILLUMINACLIP:/home/taoyan/biosoft/Trimmomatic-0.30/adapters/TruSeq3-PE.fa:2:30:10 \ LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:50
+java -jar /home/taoyan/biosoft/Trimmomatic-0.30/trimmomatic-0.30.jar PE \ 
+-threads 20 -phred33 $seq_data/${i}_1.fq.gz $seq_data/${i}_2.fq.gz \ 
+$seq_data/${i}_good_1.fq.gz $seq_data/${i}_unpaired_1.fq.gz $seq_data/${i}_good_2.fq.gz $seq_data/${i}_unpaired_2.fq.gz \
+ILLUMINACLIP:/home/taoyan/biosoft/Trimmomatic-0.30/adapters/TruSeq3-PE.fa:2:30:10 \ 
+LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:50
 done
 
 ## The third step BWA MEM align, bwa mem is very effective for any reads longer than 40bp but less than 2000bp.
